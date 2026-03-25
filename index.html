@@ -319,6 +319,25 @@
   <svg class="line-overlay" id="lineOverlay"></svg>
 </div>
 
+<div class="hint-bar" style="margin-top: 2px;">
+  <label for="difficulty" style="color:#8B6914; font-size:0.95rem;">Difficulty</label>
+  <select id="difficulty" style="
+    font-family: 'Fredoka One', cursive;
+    border: 1px solid #CD853F;
+    border-radius: 14px;
+    padding: 6px 10px;
+    background: #FDF6E3;
+    color: #5D3A1A;
+    font-size: 0.85rem;
+    outline: none;
+  ">
+    <option value="easy">Easy</option>
+    <option value="normal" selected>Normal</option>
+    <option value="hard">Hard</option>
+    <option value="expert">Expert</option>
+  </select>
+</div>
+
 <div class="hint-bar">
   <div class="hint-meter"><div class="hint-meter-fill" id="hintFill" style="width:0%"></div></div>
   <button class="hint-btn" id="hintBtn" disabled>Hint</button>
@@ -343,10 +362,51 @@
 </div>
 
 <script>
-const GRID_COLS = 6;
-const GRID_ROWS = 8;
+let GRID_COLS = 6;
+let GRID_ROWS = 8;
 
-const BOARD = [
+const DIFFICULTY_PRESETS = {
+  easy: {
+    id: "easy",
+    minHintWordLen: 4,
+    hintThreshold: 2,
+    hideFoundWordBadges: false,
+    allowUndo: true,
+    randomizeBoard: false,
+  },
+  normal: {
+    id: "normal",
+    minHintWordLen: 4,
+    hintThreshold: 3,
+    hideFoundWordBadges: false,
+    allowUndo: true,
+    randomizeBoard: true,
+  },
+  hard: {
+    id: "hard",
+    minHintWordLen: 5,
+    hintThreshold: 4,
+    hideFoundWordBadges: true,
+    allowUndo: true,
+    randomizeBoard: true,
+  },
+  expert: {
+    id: "expert",
+    minHintWordLen: 6,
+    hintThreshold: 5,
+    hideFoundWordBadges: true,
+    allowUndo: false,
+    randomizeBoard: true,
+  },
+};
+
+function getDifficulty() {
+  const el = document.getElementById("difficulty");
+  const key = (el?.value || "normal").toLowerCase();
+  return DIFFICULTY_PRESETS[key] ?? DIFFICULTY_PRESETS.normal;
+}
+
+const BASE_BOARD = [
   ['B','G','O','L','D','F'],
   ['R','R','E','H','S','I'],
   ['O','B','D','H','O','R'],
@@ -357,7 +417,7 @@ const BOARD = [
   ['A','R','K','W','O','L'],
 ];
 
-const WORDS = {
+const BASE_WORDS = {
   BROWNBEAR: {
     cells: [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[7,1]],
     color: '#8B4513',
@@ -408,6 +468,69 @@ const WORDS = {
   },
 };
 
+function deepClone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function transformBoardAndWords(board, words, transform) {
+  const srcRows = board.length;
+  const srcCols = board[0].length;
+
+  function mapCoord(r, c) {
+    switch (transform) {
+      case "identity":
+        return [r, c];
+      case "flipH":
+        return [r, srcCols - 1 - c];
+      case "flipV":
+        return [srcRows - 1 - r, c];
+      case "rot180":
+        return [srcRows - 1 - r, srcCols - 1 - c];
+      default:
+        return [r, c];
+    }
+  }
+
+  const outBoard = Array.from({ length: srcRows }, () => Array(srcCols).fill(""));
+  for (let r = 0; r < srcRows; r++) {
+    for (let c = 0; c < srcCols; c++) {
+      const [nr, nc] = mapCoord(r, c);
+      outBoard[nr][nc] = board[r][c];
+    }
+  }
+
+  const outWords = {};
+  for (const [key, w] of Object.entries(words)) {
+    outWords[key] = { ...w };
+    outWords[key].cells = w.cells.map(([r, c]) => mapCoord(r, c));
+  }
+
+  return { board: outBoard, words: outWords };
+}
+
+function pickTransform() {
+  const transforms = ["identity", "flipH", "flipV", "rot180"];
+  return transforms[Math.floor(Math.random() * transforms.length)];
+}
+
+// Restore difficulty selection (persists across reloads)
+const difficultyEl = document.getElementById("difficulty");
+const savedDifficulty = localStorage.getItem("strands:difficulty");
+if (difficultyEl && savedDifficulty && DIFFICULTY_PRESETS[savedDifficulty]) {
+  difficultyEl.value = savedDifficulty;
+}
+
+const DIFFICULTY = getDifficulty();
+const TRANSFORM = DIFFICULTY.randomizeBoard ? pickTransform() : "identity";
+const { board: BOARD, words: WORDS } = transformBoardAndWords(
+  deepClone(BASE_BOARD),
+  deepClone(BASE_WORDS),
+  TRANSFORM
+);
+
+GRID_ROWS = BOARD.length;
+GRID_COLS = BOARD[0].length;
+
 // Game state
 let selectedCells = [];
 let foundWordKeys = new Set();
@@ -428,6 +551,10 @@ for (const [key, word] of Object.entries(WORDS)) {
 const gridEl = document.getElementById('grid');
 const svgEl = document.getElementById('lineOverlay');
 const cellElements = [];
+
+// Configure grid dimensions dynamically (supports transforms/variants)
+gridEl.style.gridTemplateColumns = `repeat(${GRID_COLS}, 52px)`;
+gridEl.style.gridTemplateRows = `repeat(${GRID_ROWS}, 52px)`;
 
 for (let r = 0; r < GRID_ROWS; r++) {
   cellElements[r] = [];
@@ -492,7 +619,7 @@ function selectCell(r, c) {
   if (isCellFound(r, c)) return;
 
   // If already selected, check if it's the previous cell (allow undo)
-  if (selectedCells.length >= 2) {
+  if (DIFFICULTY.allowUndo && selectedCells.length >= 2) {
     const [pr, pc] = selectedCells[selectedCells.length - 2];
     if (pr === r && pc === c) {
       // Undo last selection
@@ -554,15 +681,28 @@ function revealWord(key, usedHint = false) {
   });
 
   // Add to found words display
-  const badge = document.createElement('span');
-  badge.className = 'found-word';
-  badge.style.background = word.color;
-  badge.textContent = word.label;
-  if (word.isSpangram) {
-    badge.style.border = '2px solid #FFD700';
-    badge.style.boxShadow = '0 0 8px rgba(255,215,0,0.4)';
+  if (!DIFFICULTY.hideFoundWordBadges) {
+    const badge = document.createElement('span');
+    badge.className = 'found-word';
+    badge.style.background = word.color;
+    badge.textContent = word.label;
+    if (word.isSpangram) {
+      badge.style.border = '2px solid #FFD700';
+      badge.style.boxShadow = '0 0 8px rgba(255,215,0,0.4)';
+    }
+    document.getElementById('foundWords').appendChild(badge);
+  } else {
+    const foundEl = document.getElementById("foundWords");
+    if (foundEl && foundEl.childElementCount === 0) {
+      const placeholder = document.createElement("span");
+      placeholder.className = "found-word";
+      placeholder.style.background = "#5D3A1A";
+      placeholder.textContent = "Found: 0";
+      foundEl.appendChild(placeholder);
+    }
+    const badge = document.querySelector("#foundWords .found-word");
+    if (badge) badge.textContent = `Found: ${foundWordKeys.size}`;
   }
-  document.getElementById('foundWords').appendChild(badge);
 
   // Check win
   if (foundWordKeys.size === Object.keys(WORDS).length) {
@@ -615,17 +755,20 @@ function submitSelection() {
       showStatus(`${w.label} found!`, 2000);
     }
     revealWord(matchedKey);
-  } else if (word.length >= 4) {
+  } else if (word.length >= DIFFICULTY.minHintWordLen) {
     // Valid length but not a theme word - fills hint meter
     hintMeter++;
-    if (hintMeter >= 3) {
+    if (hintMeter >= DIFFICULTY.hintThreshold) {
       hintMeter = 0;
       hintCount++;
       updateHintUI();
       showStatus('Hint earned!', 2000);
     } else {
       updateHintUI();
-      showStatus(`Not a theme word (+${hintMeter}/3 hint)`, 2000);
+      showStatus(
+        `Not a theme word (+${hintMeter}/${DIFFICULTY.hintThreshold} hint)`,
+        2000
+      );
     }
     // Flash cells briefly
     for (const [r, c] of cells) {
@@ -638,7 +781,7 @@ function submitSelection() {
       }, 400);
     }
   } else if (word.length > 0) {
-    showStatus('Words must be at least 4 letters', 2000);
+    showStatus(`Words must be at least ${DIFFICULTY.minHintWordLen} letters`, 2000);
     for (const [r, c] of cells) {
       cellElements[r][c].classList.add('invalid-flash');
       setTimeout(() => cellElements[r][c].classList.remove('invalid-flash'), 400);
@@ -648,7 +791,7 @@ function submitSelection() {
 
 function updateHintUI() {
   const fill = document.getElementById('hintFill');
-  fill.style.width = `${(hintMeter / 3) * 100}%`;
+  fill.style.width = `${(hintMeter / DIFFICULTY.hintThreshold) * 100}%`;
 
   const btn = document.getElementById('hintBtn');
   btn.disabled = hintCount === 0;
@@ -763,6 +906,13 @@ document.addEventListener('touchend', () => {
 });
 
 updateHintUI();
+
+// Changing difficulty reloads the page (simple for a single-file app)
+document.getElementById("difficulty").addEventListener("change", () => {
+  const v = document.getElementById("difficulty").value;
+  localStorage.setItem("strands:difficulty", v);
+  location.reload();
+});
 </script>
 </body>
 </html>
