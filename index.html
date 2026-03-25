@@ -7,11 +7,37 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Patrick+Hand&display=swap');
 
+  :root{
+    --bg: #FDF6E3;
+    --ink: #5D3A1A;
+    --muted: #8B6914;
+    --card: #F5E6C8;
+    --clue-bg: #5D3A1A;
+    --clue-ink: #FDF6E3;
+    --shadow: rgba(93,58,26,0.2);
+    --accent: #DAA520;
+    --accent-2: #CD853F;
+    --overlay: rgba(93,58,26,0.5);
+  }
+
+  body.dark{
+    --bg: #0F1210;
+    --ink: #F2E9D8;
+    --muted: #CDBA8A;
+    --card: #1B201C;
+    --clue-bg: #223126;
+    --clue-ink: #F2E9D8;
+    --shadow: rgba(0,0,0,0.45);
+    --accent: #DAA520;
+    --accent-2: #8A6A2F;
+    --overlay: rgba(0,0,0,0.6);
+  }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     font-family: 'Patrick Hand', cursive, sans-serif;
-    background: #FDF6E3;
+    background: var(--bg);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -27,7 +53,7 @@
 
   h1 {
     font-family: 'Fredoka One', cursive, sans-serif;
-    color: #5D3A1A;
+    color: var(--ink);
     font-size: 1.8rem;
     text-align: center;
     margin-bottom: 4px;
@@ -35,7 +61,7 @@
   }
 
   .subtitle {
-    color: #8B6914;
+    color: var(--muted);
     font-size: 1.1rem;
     text-align: center;
     margin-bottom: 4px;
@@ -43,15 +69,82 @@
   }
 
   .theme-clue {
-    background: #5D3A1A;
-    color: #FDF6E3;
+    background: var(--clue-bg);
+    color: var(--clue-ink);
     padding: 8px 24px;
     border-radius: 24px;
     font-size: 1.15rem;
     margin-bottom: 12px;
     text-align: center;
     font-family: 'Patrick Hand', cursive;
-    box-shadow: 0 2px 8px rgba(93,58,26,0.2);
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+
+  .toolbar{
+    width: 100%;
+    max-width: 420px;
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .toolbar .puzzle-num{
+    font-family: 'Fredoka One', cursive, sans-serif;
+    color: var(--muted);
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+  }
+
+  .toolbar .tool-actions{
+    display:flex;
+    gap: 8px;
+    align-items:center;
+  }
+
+  .icon-btn{
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: 1px solid rgba(205,133,63,0.35);
+    background: rgba(245,230,200,0.7);
+    color: var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    box-shadow: 0 2px 8px rgba(93,58,26,0.08);
+    transition: transform 0.1s, background 0.2s, box-shadow 0.2s;
+  }
+
+  body.dark .icon-btn{
+    background: rgba(27,32,28,0.8);
+    border: 1px solid rgba(218,165,32,0.2);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  }
+
+  .icon-btn:hover{
+    transform: scale(1.05);
+    box-shadow: 0 3px 10px rgba(93,58,26,0.18);
+  }
+
+  .progress {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-top: -6px;
+    margin-bottom: 10px;
+    text-align: center;
+    opacity: 0.95;
+  }
+
+  .selection-preview{
+    min-height: 28px;
+    margin-bottom: 10px;
+    font-family: 'Fredoka One', cursive, sans-serif;
+    color: var(--ink);
+    letter-spacing: 0.8px;
+    opacity: 0.9;
   }
 
   .found-words {
@@ -86,6 +179,17 @@
     margin-bottom: 12px;
   }
 
+  .grid-container.page-flip{
+    animation: pageFlip 520ms ease-in-out;
+    transform-origin: 50% 50%;
+  }
+
+  @keyframes pageFlip{
+    0%{ transform: perspective(700px) rotateY(0deg); }
+    40%{ transform: perspective(700px) rotateY(-9deg); }
+    100%{ transform: perspective(700px) rotateY(0deg); }
+  }
+
   .grid {
     display: grid;
     grid-template-columns: repeat(6, 52px);
@@ -103,8 +207,8 @@
     font-size: 1.35rem;
     font-weight: bold;
     font-family: 'Fredoka One', cursive;
-    color: #5D3A1A;
-    background: #F5E6C8;
+    color: var(--ink);
+    background: var(--card);
     border-radius: 10px;
     cursor: pointer;
     transition: transform 0.1s, background 0.2s, color 0.2s, box-shadow 0.2s;
@@ -118,7 +222,7 @@
   }
 
   .cell.selected {
-    background: #CD853F;
+    background: var(--accent-2);
     color: white;
     transform: scale(1.08);
     box-shadow: 0 3px 10px rgba(139,69,19,0.35);
@@ -129,6 +233,45 @@
     text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     cursor: default;
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+
+  /* Eric Carle-ish tissue texture overlay for found cells */
+  .cell.found::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius: 10px;
+    background-image:
+      radial-gradient(circle at 25% 30%, rgba(255,255,255,0.18) 0%, transparent 40%),
+      radial-gradient(circle at 70% 60%, rgba(0,0,0,0.10) 0%, transparent 45%),
+      linear-gradient(135deg, rgba(255,255,255,0.10), rgba(0,0,0,0.06));
+    opacity: 0.85;
+    mix-blend-mode: overlay;
+    pointer-events:none;
+  }
+
+  .cell.highlight {
+    outline: 3px solid rgba(255,215,0,0.9);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px rgba(255,215,0,0.10);
+  }
+
+  .cell .order-badge{
+    position:absolute;
+    top: -7px;
+    right: -7px;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.35);
+    color: white;
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.75rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    pointer-events:none;
   }
 
   .cell.invalid-flash {
@@ -182,18 +325,18 @@
     background: #E8D5B5;
     border-radius: 5px;
     overflow: hidden;
-    border: 1px solid #CD853F;
+    border: 1px solid var(--accent-2);
   }
 
   .hint-meter-fill {
     height: 100%;
-    background: linear-gradient(90deg, #DAA520, #FFD700);
+    background: linear-gradient(90deg, var(--accent), #FFD700);
     transition: width 0.4s ease;
     border-radius: 5px;
   }
 
   .hint-btn {
-    background: #DAA520;
+    background: var(--accent);
     color: white;
     border: none;
     padding: 6px 16px;
@@ -216,12 +359,12 @@
 
   .hint-count {
     font-family: 'Patrick Hand', cursive;
-    color: #8B6914;
+    color: var(--muted);
     font-size: 0.9rem;
   }
 
   .status-msg {
-    color: #8B6914;
+    color: var(--muted);
     font-size: 1rem;
     min-height: 24px;
     text-align: center;
@@ -232,7 +375,7 @@
     display: none;
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(93,58,26,0.5);
+    background: var(--overlay);
     z-index: 100;
     align-items: center;
     justify-content: center;
@@ -243,7 +386,7 @@
   }
 
   .modal {
-    background: #FDF6E3;
+    background: var(--bg);
     border-radius: 20px;
     padding: 32px;
     max-width: 340px;
@@ -254,13 +397,13 @@
 
   .modal h2 {
     font-family: 'Fredoka One', cursive;
-    color: #5D3A1A;
+    color: var(--ink);
     font-size: 1.6rem;
     margin-bottom: 8px;
   }
 
   .modal p {
-    color: #8B6914;
+    color: var(--muted);
     font-size: 1.05rem;
     margin-bottom: 16px;
     font-family: 'Patrick Hand', cursive;
@@ -273,8 +416,8 @@
   }
 
   .modal button {
-    background: #5D3A1A;
-    color: #FDF6E3;
+    background: var(--clue-bg);
+    color: var(--clue-ink);
     border: none;
     padding: 10px 28px;
     border-radius: 20px;
@@ -288,7 +431,7 @@
 
   .instructions {
     max-width: 380px;
-    color: #8B6914;
+    color: var(--muted);
     font-size: 0.85rem;
     text-align: center;
     margin-top: 8px;
@@ -304,19 +447,70 @@
     .cell { width: 46px; height: 46px; font-size: 1.2rem; }
     h1 { font-size: 1.5rem; }
   }
+
+  /* Grid entrance animation */
+  .cell.enter {
+    animation: enterCell 420ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+  }
+  @keyframes enterCell {
+    0% { transform: translateY(10px) scale(0.85); opacity: 0; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+
+  /* Confetti layer */
+  #confetti {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 200;
+  }
 </style>
 </head>
 <body>
+
+<canvas id="confetti"></canvas>
+
+<div class="toolbar">
+  <div class="puzzle-num" id="puzzleNum">Strands #1</div>
+  <div class="tool-actions">
+    <button class="icon-btn" id="helpBtn" aria-label="How to play">?</button>
+    <button class="icon-btn" id="statsBtn" aria-label="Stats">★</button>
+    <button class="icon-btn" id="settingsBtn" aria-label="Settings">⚙</button>
+  </div>
+</div>
 
 <h1>STRANDS</h1>
 <div class="subtitle">Brown Bear, Brown Bear</div>
 <div class="theme-clue">"What do you see?"</div>
 
+<div class="progress" id="progressText">0 of 0 theme words found</div>
+
 <div class="found-words" id="foundWords"></div>
+
+<div class="selection-preview" id="selectionPreview">&nbsp;</div>
 
 <div class="grid-container">
   <div class="grid" id="grid"></div>
   <svg class="line-overlay" id="lineOverlay"></svg>
+</div>
+
+<div class="hint-bar" style="margin-top: 2px;">
+  <label for="difficulty" style="color:#8B6914; font-size:0.95rem;">Difficulty</label>
+  <select id="difficulty" style="
+    font-family: 'Fredoka One', cursive;
+    border: 1px solid #CD853F;
+    border-radius: 14px;
+    padding: 6px 10px;
+    background: #FDF6E3;
+    color: #5D3A1A;
+    font-size: 0.85rem;
+    outline: none;
+  ">
+    <option value="easy">Easy</option>
+    <option value="normal" selected>Normal</option>
+    <option value="hard">Hard</option>
+    <option value="expert">Expert</option>
+  </select>
 </div>
 
 <div class="hint-bar">
@@ -338,15 +532,119 @@
     <h2 id="modalTitle">You did it!</h2>
     <p id="modalText">You found all the words!</p>
     <div class="emoji-summary" id="emojiSummary"></div>
-    <button onclick="document.getElementById('modal').classList.remove('active')">Close</button>
+    <div style="display:flex; gap:10px; justify-content:center; margin-top: 14px; flex-wrap: wrap;">
+      <button id="shareBtn" type="button">Copy results</button>
+      <button type="button" onclick="document.getElementById('modal').classList.remove('active')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- How-to-play -->
+<div class="modal-overlay" id="helpModal">
+  <div class="modal">
+    <h2>How to play</h2>
+    <p style="margin-bottom:10px;">
+      Trace paths through adjacent letters to find the theme words.
+      Find the <strong>spangram</strong> that spans the board!
+    </p>
+    <p style="margin-bottom:10px;">
+      Drag across letters or tap them one-by-one. Non-theme words fill the hint meter.
+    </p>
+    <p style="margin-bottom:14px;">
+      Hints: first hint highlights a word’s cells; a second hint on the same word shows the order.
+    </p>
+    <div style="display:flex; gap:10px; justify-content:center; margin-top: 14px;">
+      <button id="helpCloseBtn" type="button">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="modal-overlay" id="statsModal">
+  <div class="modal">
+    <h2>Stats</h2>
+    <p id="statsText" style="margin-bottom: 10px;"></p>
+    <div style="display:flex; gap:10px; justify-content:center; margin-top: 14px; flex-wrap: wrap;">
+      <button id="resetStatsBtn" type="button">Reset stats</button>
+      <button id="statsCloseBtn" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <h2>Settings</h2>
+    <p style="margin-bottom: 6px;">
+      <label style="display:flex; align-items:center; justify-content: space-between; gap:12px;">
+        <span>Dark mode</span>
+        <input id="darkToggle" type="checkbox" />
+      </label>
+    </p>
+    <p style="margin-bottom: 6px;">
+      <label style="display:flex; align-items:center; justify-content: space-between; gap:12px;">
+        <span>Tap-to-select mode</span>
+        <input id="tapToggle" type="checkbox" />
+      </label>
+    </p>
+    <p style="margin-bottom: 6px;">
+      <label style="display:flex; align-items:center; justify-content: space-between; gap:12px;">
+        <span>Show found word badges</span>
+        <input id="badgeToggle" type="checkbox" />
+      </label>
+    </p>
+    <div style="display:flex; gap:10px; justify-content:center; margin-top: 14px;">
+      <button id="settingsCloseBtn" type="button">Close</button>
+    </div>
   </div>
 </div>
 
 <script>
-const GRID_COLS = 6;
-const GRID_ROWS = 8;
+let GRID_COLS = 6;
+let GRID_ROWS = 8;
 
-const BOARD = [
+const DIFFICULTY_PRESETS = {
+  easy: {
+    id: "easy",
+    minHintWordLen: 4,
+    hintThreshold: 2,
+    hideFoundWordBadges: false,
+    allowUndo: true,
+    randomizeBoard: false,
+  },
+  normal: {
+    id: "normal",
+    minHintWordLen: 4,
+    hintThreshold: 3,
+    hideFoundWordBadges: false,
+    allowUndo: true,
+    randomizeBoard: true,
+  },
+  hard: {
+    id: "hard",
+    minHintWordLen: 5,
+    hintThreshold: 4,
+    hideFoundWordBadges: true,
+    allowUndo: true,
+    randomizeBoard: true,
+  },
+  expert: {
+    id: "expert",
+    minHintWordLen: 6,
+    hintThreshold: 5,
+    hideFoundWordBadges: true,
+    allowUndo: false,
+    randomizeBoard: true,
+  },
+};
+
+function getDifficulty() {
+  const el = document.getElementById("difficulty");
+  const key = (el?.value || "normal").toLowerCase();
+  return DIFFICULTY_PRESETS[key] ?? DIFFICULTY_PRESETS.normal;
+}
+
+const BASE_BOARD = [
   ['B','G','O','L','D','F'],
   ['R','R','E','H','S','I'],
   ['O','B','D','H','O','R'],
@@ -357,7 +655,7 @@ const BOARD = [
   ['A','R','K','W','O','L'],
 ];
 
-const WORDS = {
+const BASE_WORDS = {
   BROWNBEAR: {
     cells: [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[7,1]],
     color: '#8B4513',
@@ -408,13 +706,190 @@ const WORDS = {
   },
 };
 
+function deepClone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function animalIconSvg(key) {
+  // Tiny inline SVGs (simple silhouettes) for found-word badges
+  const common = 'width="16" height="16" viewBox="0 0 24 24" fill="white" aria-hidden="true"';
+  switch (key) {
+    case "BROWNBEAR":
+      return `<svg ${common}><path d="M7.5 8.2c-1.4-2.1.4-4.2 2.4-3.6.8-1.3 2.6-1.3 3.4 0 2-.6 3.8 1.5 2.4 3.6 1.8.9 3 2.8 3 4.9 0 3.2-2.9 5.8-6.5 5.8h-3.6C8.4 19.2 5.5 16.6 5.5 13.1c0-2.1 1.2-4 2-4.9z"/></svg>`;
+    case "GOLDFISH":
+      return `<svg ${common}><path d="M14 7c3.2 0 6 2.4 6 5s-2.8 5-6 5c-1.7 0-3.3-.7-4.4-1.7L6 17v-3.2C5.4 13 5 12 5 12s.4-1 .9-1.8V7l3.6 1.7C10.7 7.7 12.3 7 14 7z"/><circle cx="15.8" cy="11" r="1.1"/></svg>`;
+    case "REDBIRD":
+      return `<svg ${common}><path d="M6 14c3-5 8-8 12-7-1.2 1.2-1.5 2.6-1 4 1 .1 2 .7 2.7 1.8-1.7.7-3.6 1.2-5.7 1.4L11 19l-2.3-4.6C7.5 14.5 6.7 14.3 6 14z"/></svg>`;
+    case "HORSE":
+      return `<svg ${common}><path d="M7 18c0-4 1-7 4-10l4-2 2 2-2 2 2 2-1 2h-2l-1 4H7z"/></svg>`;
+    case "SHEEP":
+      return `<svg ${common}><path d="M8 13c-1.7 0-3-1.2-3-2.7C5 8.8 6.3 7.6 8 7.6c.3-1.2 1.5-2.1 2.9-2.1 1 0 1.9.4 2.4 1 1.5-.5 3.2.3 3.6 1.8 1.5.2 2.6 1.3 2.6 2.7 0 1.5-1.3 2.7-3 2.7H8zm2 1h4v4H10v-4z"/></svg>`;
+    case "FROG":
+      return `<svg ${common}><path d="M7 14c-1.5 0-3-1.3-3-3 0-1.6 1.2-3 2.8-3.1C7.7 6.7 9.5 6 12 6s4.3.7 5.2 1.9C18.8 8 20 9.4 20 11c0 1.7-1.5 3-3 3-1.4 2.3-3.2 3-5 3s-3.6-.7-5-3z"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></svg>`;
+    case "DUCK":
+      return `<svg ${common}><path d="M6 14c0-2.4 2.3-4.3 5.2-4.5 1.1-1.6 3.1-2.5 5.3-2.5-.6.8-.6 1.8 0 2.6 1.7.5 2.5 1.7 2.5 3.1 0 2.2-2.3 4-5.2 4H9.2C7.3 16.7 6 15.5 6 14z"/></svg>`;
+    case "YELLOW":
+      return `<svg ${common}><path d="M12 3l2.2 6.8H21l-5.5 4 2.1 7-5.6-4-5.6 4 2.1-7L3 9.8h6.8L12 3z"/></svg>`;
+    default:
+      return "";
+  }
+}
+
+function transformBoardAndWords(board, words, transform) {
+  const srcRows = board.length;
+  const srcCols = board[0].length;
+
+  function mapCoord(r, c) {
+    switch (transform) {
+      case "identity":
+        return [r, c];
+      case "flipH":
+        return [r, srcCols - 1 - c];
+      case "flipV":
+        return [srcRows - 1 - r, c];
+      case "rot180":
+        return [srcRows - 1 - r, srcCols - 1 - c];
+      default:
+        return [r, c];
+    }
+  }
+
+  const outBoard = Array.from({ length: srcRows }, () => Array(srcCols).fill(""));
+  for (let r = 0; r < srcRows; r++) {
+    for (let c = 0; c < srcCols; c++) {
+      const [nr, nc] = mapCoord(r, c);
+      outBoard[nr][nc] = board[r][c];
+    }
+  }
+
+  const outWords = {};
+  for (const [key, w] of Object.entries(words)) {
+    outWords[key] = { ...w };
+    outWords[key].cells = w.cells.map(([r, c]) => mapCoord(r, c));
+  }
+
+  return { board: outBoard, words: outWords };
+}
+
+function pickTransform() {
+  const transforms = ["identity", "flipH", "flipV", "rot180"];
+  return transforms[Math.floor(Math.random() * transforms.length)];
+}
+
+// Restore difficulty selection (persists across reloads)
+const difficultyEl = document.getElementById("difficulty");
+const savedDifficulty = localStorage.getItem("strands:difficulty");
+if (difficultyEl && savedDifficulty && DIFFICULTY_PRESETS[savedDifficulty]) {
+  difficultyEl.value = savedDifficulty;
+}
+
+const DEFAULT_SETTINGS = {
+  darkMode: false,
+  tapMode: true,
+  showBadges: true,
+};
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem("strands:settings");
+    if (!raw) return { ...DEFAULT_SETTINGS };
+    const parsed = JSON.parse(raw);
+    return { ...DEFAULT_SETTINGS, ...parsed };
+  } catch {
+    return { ...DEFAULT_SETTINGS };
+  }
+}
+
+function saveSettings(next) {
+  localStorage.setItem("strands:settings", JSON.stringify(next));
+}
+
+let SETTINGS = loadSettings();
+
+function applySettings() {
+  document.body.classList.toggle("dark", !!SETTINGS.darkMode);
+  const darkToggle = document.getElementById("darkToggle");
+  const tapToggle = document.getElementById("tapToggle");
+  const badgeToggle = document.getElementById("badgeToggle");
+  if (darkToggle) darkToggle.checked = !!SETTINGS.darkMode;
+  if (tapToggle) tapToggle.checked = !!SETTINGS.tapMode;
+  if (badgeToggle) badgeToggle.checked = !!SETTINGS.showBadges;
+}
+
+const PROGRESS_KEY = "strands:progress:1";
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(PROGRESS_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function saveProgress(state) {
+  localStorage.setItem(PROGRESS_KEY, JSON.stringify(state));
+}
+
+const DIFFICULTY = getDifficulty();
+const savedProgress = loadProgress();
+let TRANSFORM = DIFFICULTY.randomizeBoard ? pickTransform() : "identity";
+if (
+  savedProgress &&
+  typeof savedProgress === "object" &&
+  savedProgress.difficulty === DIFFICULTY.id &&
+  typeof savedProgress.transform === "string"
+) {
+  TRANSFORM = savedProgress.transform;
+}
+const { board: BOARD, words: WORDS } = transformBoardAndWords(
+  deepClone(BASE_BOARD),
+  deepClone(BASE_WORDS),
+  TRANSFORM
+);
+
+GRID_ROWS = BOARD.length;
+GRID_COLS = BOARD[0].length;
+
+const PUZZLE_NUMBER = 1;
+const THEME_TOTAL = Object.keys(WORDS).length;
+
 // Game state
 let selectedCells = [];
 let foundWordKeys = new Set();
-let hintMeter = 0;  // 0..3
+let hintMeter = 0;  // 0..threshold
 let hintCount = 0;
 let hintsUsed = new Set();
 let isDragging = false;
+
+function restoreProgressIfAny() {
+  if (!savedProgress) return;
+  if (Array.isArray(savedProgress.foundWords)) {
+    foundWordKeys = new Set(savedProgress.foundWords);
+  }
+  if (typeof savedProgress.hintMeter === "number") hintMeter = savedProgress.hintMeter;
+  if (typeof savedProgress.hintCount === "number") hintCount = savedProgress.hintCount;
+  if (Array.isArray(savedProgress.hintsUsed)) hintsUsed = new Set(savedProgress.hintsUsed);
+  if (savedProgress.hintStages && typeof savedProgress.hintStages === "object") {
+    for (const [k, v] of Object.entries(savedProgress.hintStages)) {
+      hintStages[k] = v;
+    }
+  }
+}
+
+function persistProgress() {
+  saveProgress({
+    difficulty: DIFFICULTY.id,
+    transform: TRANSFORM,
+    foundWords: Array.from(foundWordKeys),
+    hintMeter,
+    hintCount,
+    hintsUsed: Array.from(hintsUsed),
+    hintStages,
+    updatedAt: Date.now(),
+  });
+}
 
 // Build cell lookup: "row,col" -> word key
 const cellToWord = {};
@@ -429,6 +904,10 @@ const gridEl = document.getElementById('grid');
 const svgEl = document.getElementById('lineOverlay');
 const cellElements = [];
 
+// Configure grid dimensions dynamically (supports transforms/variants)
+gridEl.style.gridTemplateColumns = `repeat(${GRID_COLS}, 52px)`;
+gridEl.style.gridTemplateRows = `repeat(${GRID_ROWS}, 52px)`;
+
 for (let r = 0; r < GRID_ROWS; r++) {
   cellElements[r] = [];
   for (let c = 0; c < GRID_COLS; c++) {
@@ -437,8 +916,51 @@ for (let r = 0; r < GRID_ROWS; r++) {
     cell.textContent = BOARD[r][c];
     cell.dataset.row = r;
     cell.dataset.col = c;
+    cell.classList.add("enter");
+    cell.style.animationDelay = `${(r * GRID_COLS + c) * 18}ms`;
     gridEl.appendChild(cell);
     cellElements[r][c] = cell;
+  }
+}
+
+function applyFoundWordVisual(key) {
+  const word = WORDS[key];
+  if (!word) return;
+  for (const [r, c] of word.cells) {
+    const cell = cellElements[r][c];
+    cell.classList.add("found");
+    cell.style.background = word.color;
+    cell.style.color = "white";
+  }
+}
+
+function rebuildFoundBadges() {
+  const foundEl = document.getElementById("foundWords");
+  if (!foundEl) return;
+  foundEl.innerHTML = "";
+  const allowBadges = SETTINGS.showBadges && !DIFFICULTY.hideFoundWordBadges;
+  if (!allowBadges) {
+    const placeholder = document.createElement("span");
+    placeholder.className = "found-word";
+    placeholder.style.background = "#5D3A1A";
+    placeholder.textContent = `Found: ${foundWordKeys.size}`;
+    foundEl.appendChild(placeholder);
+    return;
+  }
+  for (const key of foundWordKeys) {
+    const word = WORDS[key];
+    if (!word) continue;
+    const badge = document.createElement("span");
+    badge.className = "found-word";
+    badge.style.background = word.color;
+    badge.innerHTML = `${animalIconSvg(key)}<span style="margin-left:6px;">${word.label}</span>`;
+    badge.dataset.wordKey = key;
+    badge.title = "Tap to highlight";
+    if (word.isSpangram) {
+      badge.style.border = "2px solid #FFD700";
+      badge.style.boxShadow = "0 0 8px rgba(255,215,0,0.4)";
+    }
+    foundEl.appendChild(badge);
   }
 }
 
@@ -449,6 +971,16 @@ function resizeSvg() {
 }
 resizeSvg();
 window.addEventListener('resize', resizeSvg);
+
+// Restore any in-progress game state (after grid exists)
+restoreProgressIfAny();
+if (foundWordKeys.size > 0) {
+  for (const k of foundWordKeys) applyFoundWordVisual(k);
+  rebuildFoundBadges();
+}
+updateHintUI();
+updateProgressText();
+applySettings();
 
 function getCellCenter(r, c) {
   const cell = cellElements[r][c];
@@ -480,6 +1012,19 @@ function isAdjacent(r1, c1, r2, c2) {
   return Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1 && !(r1 === r2 && c1 === c2);
 }
 
+function updateSelectionPreview() {
+  const el = document.getElementById("selectionPreview");
+  if (!el) return;
+  const w = getSelectedWord();
+  el.textContent = w ? w : "\u00A0";
+}
+
+function updateProgressText() {
+  const el = document.getElementById("progressText");
+  if (!el) return;
+  el.textContent = `${foundWordKeys.size} of ${THEME_TOTAL} theme words found`;
+}
+
 function isSelected(r, c) {
   return selectedCells.some(([sr, sc]) => sr === r && sc === c);
 }
@@ -492,7 +1037,7 @@ function selectCell(r, c) {
   if (isCellFound(r, c)) return;
 
   // If already selected, check if it's the previous cell (allow undo)
-  if (selectedCells.length >= 2) {
+  if (DIFFICULTY.allowUndo && selectedCells.length >= 2) {
     const [pr, pc] = selectedCells[selectedCells.length - 2];
     if (pr === r && pc === c) {
       // Undo last selection
@@ -513,6 +1058,7 @@ function selectCell(r, c) {
   selectedCells.push([r, c]);
   cellElements[r][c].classList.add('selected');
   drawLines();
+  updateSelectionPreview();
 }
 
 function clearSelection() {
@@ -523,6 +1069,7 @@ function clearSelection() {
   }
   selectedCells = [];
   svgEl.innerHTML = '';
+  updateSelectionPreview();
 }
 
 function getSelectedWord() {
@@ -538,10 +1085,33 @@ function showStatus(msg, duration = 2000) {
   }
 }
 
+function narrativeLineFor(key) {
+  const lines = {
+    REDBIRD: "I see a red bird looking at me…",
+    GOLDFISH: "I see a goldfish swimming by…",
+    HORSE: "I see a horse running free…",
+    SHEEP: "I see a sheep softly saying ‘baa’…",
+    FROG: "I see a frog hopping with glee…",
+    DUCK: "I see a duck going ‘quack’ at me…",
+    YELLOW: "I see something yellow — bright as the sun…",
+    BROWNBEAR: "Spangram! Brown Bear, Brown Bear…",
+  };
+  return lines[key] || "I see something in the grid…";
+}
+
 function revealWord(key, usedHint = false) {
   const word = WORDS[key];
   foundWordKeys.add(key);
   if (usedHint) hintsUsed.add(key);
+
+  const gridContainer = document.querySelector(".grid-container");
+  if (gridContainer) {
+    gridContainer.classList.remove("page-flip");
+    // force reflow
+    void gridContainer.offsetWidth;
+    gridContainer.classList.add("page-flip");
+    setTimeout(() => gridContainer.classList.remove("page-flip"), 600);
+  }
 
   word.cells.forEach(([r, c], i) => {
     setTimeout(() => {
@@ -554,20 +1124,39 @@ function revealWord(key, usedHint = false) {
   });
 
   // Add to found words display
-  const badge = document.createElement('span');
-  badge.className = 'found-word';
-  badge.style.background = word.color;
-  badge.textContent = word.label;
-  if (word.isSpangram) {
-    badge.style.border = '2px solid #FFD700';
-    badge.style.boxShadow = '0 0 8px rgba(255,215,0,0.4)';
+  const allowBadges = SETTINGS.showBadges && !DIFFICULTY.hideFoundWordBadges;
+  if (allowBadges) {
+    const badge = document.createElement('span');
+    badge.className = 'found-word';
+    badge.style.background = word.color;
+    badge.innerHTML = `${animalIconSvg(key)}<span style="margin-left:6px;">${word.label}</span>`;
+    badge.dataset.wordKey = key;
+    badge.title = "Tap to highlight";
+    if (word.isSpangram) {
+      badge.style.border = '2px solid #FFD700';
+      badge.style.boxShadow = '0 0 8px rgba(255,215,0,0.4)';
+    }
+    document.getElementById('foundWords').appendChild(badge);
+  } else {
+    const foundEl = document.getElementById("foundWords");
+    if (foundEl && foundEl.childElementCount === 0) {
+      const placeholder = document.createElement("span");
+      placeholder.className = "found-word";
+      placeholder.style.background = "#5D3A1A";
+      placeholder.textContent = "Found: 0";
+      foundEl.appendChild(placeholder);
+    }
+    const badge = document.querySelector("#foundWords .found-word");
+    if (badge) badge.textContent = `Found: ${foundWordKeys.size}`;
   }
-  document.getElementById('foundWords').appendChild(badge);
 
   // Check win
   if (foundWordKeys.size === Object.keys(WORDS).length) {
     setTimeout(showWinModal, 800);
   }
+
+  updateProgressText();
+  persistProgress();
 }
 
 function submitSelection() {
@@ -610,23 +1199,27 @@ function submitSelection() {
   if (matchedKey) {
     const w = WORDS[matchedKey];
     if (w.isSpangram) {
-      showStatus('Spangram found!', 2500);
+      showStatus(narrativeLineFor(matchedKey), 2500);
     } else {
-      showStatus(`${w.label} found!`, 2000);
+      showStatus(narrativeLineFor(matchedKey), 2500);
     }
     revealWord(matchedKey);
-  } else if (word.length >= 4) {
+  } else if (word.length >= DIFFICULTY.minHintWordLen) {
     // Valid length but not a theme word - fills hint meter
     hintMeter++;
-    if (hintMeter >= 3) {
+    if (hintMeter >= DIFFICULTY.hintThreshold) {
       hintMeter = 0;
       hintCount++;
       updateHintUI();
       showStatus('Hint earned!', 2000);
     } else {
       updateHintUI();
-      showStatus(`Not a theme word (+${hintMeter}/3 hint)`, 2000);
+      showStatus(
+        `Not a theme word (+${hintMeter}/${DIFFICULTY.hintThreshold} hint)`,
+        2000
+      );
     }
+    persistProgress();
     // Flash cells briefly
     for (const [r, c] of cells) {
       const cell = cellElements[r][c];
@@ -638,7 +1231,7 @@ function submitSelection() {
       }, 400);
     }
   } else if (word.length > 0) {
-    showStatus('Words must be at least 4 letters', 2000);
+    showStatus(`Words must be at least ${DIFFICULTY.minHintWordLen} letters`, 2000);
     for (const [r, c] of cells) {
       cellElements[r][c].classList.add('invalid-flash');
       setTimeout(() => cellElements[r][c].classList.remove('invalid-flash'), 400);
@@ -648,7 +1241,7 @@ function submitSelection() {
 
 function updateHintUI() {
   const fill = document.getElementById('hintFill');
-  fill.style.width = `${(hintMeter / 3) * 100}%`;
+  fill.style.width = `${(hintMeter / DIFFICULTY.hintThreshold) * 100}%`;
 
   const btn = document.getElementById('hintBtn');
   btn.disabled = hintCount === 0;
@@ -657,27 +1250,9 @@ function updateHintUI() {
   countEl.textContent = `${hintCount} hint${hintCount !== 1 ? 's' : ''}`;
 }
 
-// Hint: reveal the cells of a random unfound word
-document.getElementById('hintBtn').addEventListener('click', () => {
-  if (hintCount <= 0) return;
-  const unfound = Object.keys(WORDS).filter(k => !foundWordKeys.has(k) && !WORDS[k].isSpangram);
-  if (unfound.length === 0) {
-    // Only spangram left
-    const spanKey = Object.keys(WORDS).find(k => WORDS[k].isSpangram && !foundWordKeys.has(k));
-    if (spanKey) {
-      hintCount--;
-      updateHintUI();
-      revealWord(spanKey, true);
-      showStatus('Hint used: Spangram revealed!', 2500);
-    }
-    return;
-  }
+const hintStages = {}; // wordKey -> 0|1|2
 
-  const key = unfound[Math.floor(Math.random() * unfound.length)];
-  hintCount--;
-  updateHintUI();
-
-  // Flash the cells of the word as a hint (highlight them briefly)
+function flashWordCells(key, ms = 1500) {
   const word = WORDS[key];
   word.cells.forEach(([r, c], i) => {
     setTimeout(() => {
@@ -689,11 +1264,55 @@ document.getElementById('hintBtn').addEventListener('click', () => {
           cell.style.background = '';
           cell.style.color = '';
         }
-      }, 1500);
+      }, ms);
     }, i * 80);
   });
+}
+
+function showOrderHint(key, ms = 1800) {
+  const word = WORDS[key];
+  word.cells.forEach(([r, c], idx) => {
+    const cell = cellElements[r][c];
+    const badge = document.createElement("span");
+    badge.className = "order-badge";
+    badge.textContent = String(idx + 1);
+    cell.appendChild(badge);
+    cell.classList.add("highlight");
+    setTimeout(() => {
+      badge.remove();
+      cell.classList.remove("highlight");
+    }, ms);
+  });
+}
+
+// Hint: two-stage hints per word
+document.getElementById('hintBtn').addEventListener('click', () => {
+  if (hintCount <= 0) return;
+  const allUnfound = Object.keys(WORDS).filter(k => !foundWordKeys.has(k));
+  const candidates = allUnfound.filter(k => (hintStages[k] ?? 0) < 2);
+  if (candidates.length === 0) return;
+
+  // Prefer non-spangram hints first
+  const nonSpan = candidates.filter(k => !WORDS[k].isSpangram);
+  const pool = nonSpan.length ? nonSpan : candidates;
+  const key = pool[Math.floor(Math.random() * pool.length)];
+
+  const stage = hintStages[key] ?? 0;
+  hintCount--;
+  updateHintUI();
+
   hintsUsed.add(key);
-  showStatus(`Hint: look for ${word.label}`, 2500);
+  if (stage === 0) {
+    hintStages[key] = 1;
+    flashWordCells(key, 1500);
+    showStatus(`Hint: cells for ${WORDS[key].label}`, 2500);
+  } else {
+    hintStages[key] = 2;
+    flashWordCells(key, 900);
+    showOrderHint(key, 1800);
+    showStatus(`Hint: order for ${WORDS[key].label}`, 2500);
+  }
+  persistProgress();
 });
 
 function showWinModal() {
@@ -710,6 +1329,95 @@ function showWinModal() {
   document.getElementById('modalTitle').textContent = 'Brown Bear, Brown Bear!';
   document.getElementById('modalText').textContent = `You found all ${totalWords} words!`;
   document.getElementById('modal').classList.add('active');
+
+  // Update stats
+  const stats = loadStats();
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0, 10);
+  const isPerfect = hintsUsed.size === 0;
+  stats.completed += 1;
+  if (isPerfect) stats.perfect += 1;
+  if (stats.lastDate) {
+    const last = new Date(stats.lastDate + "T00:00:00");
+    const diffDays = Math.floor((today - last) / (24 * 60 * 60 * 1000));
+    stats.streak = diffDays === 1 ? stats.streak + 1 : diffDays === 0 ? stats.streak : 1;
+  } else {
+    stats.streak = 1;
+  }
+  stats.bestStreak = Math.max(stats.bestStreak, stats.streak);
+  stats.lastDate = todayStr;
+  saveStats(stats);
+
+  // Clear saved progress on completion
+  localStorage.removeItem(PROGRESS_KEY);
+
+  // Confetti burst
+  startConfetti();
+}
+
+function buildEmojiGrid() {
+  const rows = [];
+  for (let r = 0; r < GRID_ROWS; r++) {
+    let line = "";
+    for (let c = 0; c < GRID_COLS; c++) {
+      const key = cellToWord[`${r},${c}`];
+      if (!key) {
+        line += "🟤";
+        continue;
+      }
+      const w = WORDS[key];
+      if (w.isSpangram) {
+        line += hintsUsed.has(key) ? "💡" : "🟡";
+      } else {
+        line += hintsUsed.has(key) ? "💡" : "🔵";
+      }
+    }
+    rows.push(line);
+  }
+  return rows.join("\n");
+}
+
+function startConfetti() {
+  const canvas = document.getElementById("confetti");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const colors = ["#DAA520", "#CC2936", "#2E5EAA", "#2D8B46", "#F5E6C8"];
+  const parts = Array.from({ length: 140 }, () => ({
+    x: canvas.width / 2,
+    y: canvas.height / 3,
+    vx: (Math.random() - 0.5) * 10,
+    vy: (Math.random() - 0.8) * 12,
+    g: 0.25 + Math.random() * 0.12,
+    r: 3 + Math.random() * 5,
+    c: colors[Math.floor(Math.random() * colors.length)],
+    a: 1,
+    spin: (Math.random() - 0.5) * 0.3,
+    rot: Math.random() * Math.PI,
+  }));
+
+  const start = performance.now();
+  function frame(t) {
+    const dt = (t - start) / 1000;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const p of parts) {
+      p.vy += p.g;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.spin;
+      p.a = Math.max(0, 1 - dt / 2.2);
+      ctx.save();
+      ctx.globalAlpha = p.a;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.c;
+      ctx.fillRect(-p.r, -p.r * 0.6, p.r * 2, p.r * 1.2);
+      ctx.restore();
+    }
+    if (dt < 2.4) requestAnimationFrame(frame);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  requestAnimationFrame(frame);
 }
 
 // Input handling - mouse
@@ -733,6 +1441,27 @@ document.addEventListener('mouseup', () => {
     isDragging = false;
     if (selectedCells.length > 0) submitSelection();
   }
+});
+
+// Tap-to-select mode (alternative to drag)
+let lastTap = { t: 0, r: -1, c: -1 };
+gridEl.addEventListener("click", (e) => {
+  if (!SETTINGS.tapMode) return;
+  const cell = e.target.closest(".cell");
+  if (!cell) return;
+  if (isDragging) return;
+  const r = +cell.dataset.row;
+  const c = +cell.dataset.col;
+  const now = Date.now();
+  const isSame = lastTap.r === r && lastTap.c === c;
+  const isFast = now - lastTap.t < 350;
+  if (isSame && isFast && selectedCells.length > 0) {
+    submitSelection();
+    lastTap = { t: 0, r: -1, c: -1 };
+    return;
+  }
+  selectCell(r, c);
+  lastTap = { t: now, r, c };
 });
 
 // Input handling - touch
@@ -763,6 +1492,123 @@ document.addEventListener('touchend', () => {
 });
 
 updateHintUI();
+
+// Changing difficulty reloads the page (simple for a single-file app)
+document.getElementById("difficulty").addEventListener("change", () => {
+  const v = document.getElementById("difficulty").value;
+  localStorage.setItem("strands:difficulty", v);
+  location.reload();
+});
+
+// Initial UI
+document.getElementById("puzzleNum").textContent = `Strands #${PUZZLE_NUMBER}`;
+updateProgressText();
+updateSelectionPreview();
+
+function openOverlay(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.add("active");
+}
+function closeOverlay(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove("active");
+}
+
+// Help / tutorial
+document.getElementById("helpBtn").addEventListener("click", () => openOverlay("helpModal"));
+document.getElementById("helpCloseBtn").addEventListener("click", () => {
+  localStorage.setItem("strands:seenTutorial", "1");
+  closeOverlay("helpModal");
+});
+document.getElementById("helpModal").addEventListener("click", (e) => {
+  if (e.target.id === "helpModal") closeOverlay("helpModal");
+});
+if (!localStorage.getItem("strands:seenTutorial")) {
+  openOverlay("helpModal");
+}
+
+// Settings
+document.getElementById("settingsBtn").addEventListener("click", () => {
+  applySettings();
+  openOverlay("settingsModal");
+});
+document.getElementById("settingsCloseBtn").addEventListener("click", () => {
+  closeOverlay("settingsModal");
+});
+document.getElementById("settingsModal").addEventListener("click", (e) => {
+  if (e.target.id === "settingsModal") closeOverlay("settingsModal");
+});
+document.getElementById("darkToggle").addEventListener("change", (e) => {
+  SETTINGS.darkMode = !!e.target.checked;
+  saveSettings(SETTINGS);
+  applySettings();
+});
+document.getElementById("tapToggle").addEventListener("change", (e) => {
+  SETTINGS.tapMode = !!e.target.checked;
+  saveSettings(SETTINGS);
+});
+document.getElementById("badgeToggle").addEventListener("change", (e) => {
+  SETTINGS.showBadges = !!e.target.checked;
+  saveSettings(SETTINGS);
+  location.reload();
+});
+
+// Stats
+const STATS_KEY = "strands:stats";
+function loadStats() {
+  try {
+    const raw = localStorage.getItem(STATS_KEY);
+    return raw
+      ? { completed: 0, perfect: 0, streak: 0, bestStreak: 0, lastDate: "", ...JSON.parse(raw) }
+      : { completed: 0, perfect: 0, streak: 0, bestStreak: 0, lastDate: "" };
+  } catch {
+    return { completed: 0, perfect: 0, streak: 0, bestStreak: 0, lastDate: "" };
+  }
+}
+function saveStats(stats) {
+  localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+}
+function renderStats() {
+  const s = loadStats();
+  document.getElementById("statsText").textContent =
+    `Completed: ${s.completed}\nPerfect: ${s.perfect}\nStreak: ${s.streak}\nBest streak: ${s.bestStreak}`;
+  document.getElementById("statsText").style.whiteSpace = "pre-line";
+}
+document.getElementById("statsBtn").addEventListener("click", () => {
+  renderStats();
+  openOverlay("statsModal");
+});
+document.getElementById("statsCloseBtn").addEventListener("click", () => closeOverlay("statsModal"));
+document.getElementById("statsModal").addEventListener("click", (e) => {
+  if (e.target.id === "statsModal") closeOverlay("statsModal");
+});
+document.getElementById("resetStatsBtn").addEventListener("click", () => {
+  localStorage.removeItem(STATS_KEY);
+  renderStats();
+});
+
+// Found word badge -> highlight
+document.getElementById("foundWords").addEventListener("click", (e) => {
+  const badge = e.target.closest(".found-word");
+  if (!badge) return;
+  const key = badge.dataset.wordKey;
+  if (!key || !WORDS[key]) return;
+  for (const [r, c] of WORDS[key].cells) cellElements[r][c].classList.add("highlight");
+  setTimeout(() => {
+    for (const [r, c] of WORDS[key].cells) cellElements[r][c].classList.remove("highlight");
+  }, 1400);
+});
+
+// Copy/share results
+document.getElementById("shareBtn").addEventListener("click", async () => {
+  const text = `Strands #${PUZZLE_NUMBER}\n${buildEmojiGrid()}\n`;
+  try {
+    await navigator.clipboard.writeText(text);
+    showStatus("Copied results to clipboard!", 2000);
+  } catch {
+    showStatus("Could not copy (clipboard blocked).", 2000);
+  }
+});
 </script>
 </body>
 </html>
