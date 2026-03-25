@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strands - Brown Bear, Brown Bear</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Patrick+Hand&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Patrick Hand', cursive, sans-serif;
+    background: #FDF6E3;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+    user-select: none;
+    -webkit-user-select: none;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(139,69,19,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(218,165,32,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 80%, rgba(34,139,34,0.04) 0%, transparent 50%);
+  }
+
+  h1 {
+    font-family: 'Fredoka One', cursive, sans-serif;
+    color: #5D3A1A;
+    font-size: 1.8rem;
+    text-align: center;
+    margin-bottom: 4px;
+    text-shadow: 1px 1px 0 rgba(218,165,32,0.3);
+  }
+
+  .subtitle {
+    color: #8B6914;
+    font-size: 1.1rem;
+    text-align: center;
+    margin-bottom: 4px;
+    font-style: italic;
+  }
+
+  .theme-clue {
+    background: #5D3A1A;
+    color: #FDF6E3;
+    padding: 8px 24px;
+    border-radius: 24px;
+    font-size: 1.15rem;
+    margin-bottom: 12px;
+    text-align: center;
+    font-family: 'Patrick Hand', cursive;
+    box-shadow: 0 2px 8px rgba(93,58,26,0.2);
+  }
+
+  .found-words {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 10px;
+    min-height: 32px;
+    max-width: 380px;
+  }
+
+  .found-word {
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-family: 'Fredoka One', cursive;
+    letter-spacing: 0.5px;
+  }
+
+  @keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .grid-container {
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(6, 52px);
+    grid-template-rows: repeat(8, 52px);
+    gap: 4px;
+    touch-action: none;
+  }
+
+  .cell {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    font-weight: bold;
+    font-family: 'Fredoka One', cursive;
+    color: #5D3A1A;
+    background: #F5E6C8;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.2s, color 0.2s, box-shadow 0.2s;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(93,58,26,0.1);
+  }
+
+  .cell:hover:not(.found) {
+    transform: scale(1.05);
+    box-shadow: 0 3px 8px rgba(93,58,26,0.2);
+  }
+
+  .cell.selected {
+    background: #CD853F;
+    color: white;
+    transform: scale(1.08);
+    box-shadow: 0 3px 10px rgba(139,69,19,0.35);
+  }
+
+  .cell.found {
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    cursor: default;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+
+  .cell.invalid-flash {
+    animation: shake 0.4s ease-in-out;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+  }
+
+  @keyframes cellReveal {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  .cell.revealing {
+    animation: cellReveal 0.3s ease-in-out;
+  }
+
+  svg.line-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  svg.line-overlay line {
+    stroke: rgba(139, 69, 19, 0.4);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+
+  .hint-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .hint-meter {
+    width: 120px;
+    height: 10px;
+    background: #E8D5B5;
+    border-radius: 5px;
+    overflow: hidden;
+    border: 1px solid #CD853F;
+  }
+
+  .hint-meter-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #DAA520, #FFD700);
+    transition: width 0.4s ease;
+    border-radius: 5px;
+  }
+
+  .hint-btn {
+    background: #DAA520;
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 16px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .hint-btn:hover:not(:disabled) {
+    background: #B8860B;
+    transform: scale(1.05);
+  }
+
+  .hint-btn:disabled {
+    background: #ccc;
+    cursor: default;
+  }
+
+  .hint-count {
+    font-family: 'Patrick Hand', cursive;
+    color: #8B6914;
+    font-size: 0.9rem;
+  }
+
+  .status-msg {
+    color: #8B6914;
+    font-size: 1rem;
+    min-height: 24px;
+    text-align: center;
+    transition: opacity 0.3s;
+  }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(93,58,26,0.5);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal {
+    background: #FDF6E3;
+    border-radius: 20px;
+    padding: 32px;
+    max-width: 340px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(93,58,26,0.3);
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .modal h2 {
+    font-family: 'Fredoka One', cursive;
+    color: #5D3A1A;
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+  }
+
+  .modal p {
+    color: #8B6914;
+    font-size: 1.05rem;
+    margin-bottom: 16px;
+    font-family: 'Patrick Hand', cursive;
+  }
+
+  .modal .emoji-summary {
+    font-size: 1.4rem;
+    margin-bottom: 16px;
+    letter-spacing: 2px;
+  }
+
+  .modal button {
+    background: #5D3A1A;
+    color: #FDF6E3;
+    border: none;
+    padding: 10px 28px;
+    border-radius: 20px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .modal button:hover { background: #8B4513; }
+
+  .instructions {
+    max-width: 380px;
+    color: #8B6914;
+    font-size: 0.85rem;
+    text-align: center;
+    margin-top: 8px;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 400px) {
+    .grid {
+      grid-template-columns: repeat(6, 46px);
+      grid-template-rows: repeat(8, 46px);
+      gap: 3px;
+    }
+    .cell { width: 46px; height: 46px; font-size: 1.2rem; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<h1>STRANDS</h1>
+<div class="subtitle">Brown Bear, Brown Bear</div>
+<div class="theme-clue">"What do you see?"</div>
+
+<div class="found-words" id="foundWords"></div>
+
+<div class="grid-container">
+  <div class="grid" id="grid"></div>
+  <svg class="line-overlay" id="lineOverlay"></svg>
+</div>
+
+<div class="hint-bar">
+  <div class="hint-meter"><div class="hint-meter-fill" id="hintFill" style="width:0%"></div></div>
+  <button class="hint-btn" id="hintBtn" disabled>Hint</button>
+  <span class="hint-count" id="hintCount">0 hints</span>
+</div>
+
+<div class="status-msg" id="statusMsg">&nbsp;</div>
+
+<div class="instructions">
+  Trace paths through adjacent letters to find all the theme words.
+  Find the spangram that spans the board!
+  Non-theme words fill the hint meter.
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2 id="modalTitle">You did it!</h2>
+    <p id="modalText">You found all the words!</p>
+    <div class="emoji-summary" id="emojiSummary"></div>
+    <button onclick="document.getElementById('modal').classList.remove('active')">Close</button>
+  </div>
+</div>
+
+<script>
+const GRID_COLS = 6;
+const GRID_ROWS = 8;
+
+const BOARD = [
+  ['B','G','O','L','D','F'],
+  ['R','R','E','H','S','I'],
+  ['O','B','D','H','O','R'],
+  ['W','I','R','D','E','S'],
+  ['N','F','R','O','S','H'],
+  ['B','D','G','P','E','E'],
+  ['E','U','C','Y','E','L'],
+  ['A','R','K','W','O','L'],
+];
+
+const WORDS = {
+  BROWNBEAR: {
+    cells: [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[7,1]],
+    color: '#8B4513',
+    isSpangram: true,
+    label: 'BROWN BEAR'
+  },
+  GOLDFISH: {
+    cells: [[0,1],[0,2],[0,3],[0,4],[0,5],[1,5],[1,4],[1,3]],
+    color: '#E8960C',
+    isSpangram: false,
+    label: 'GOLDFISH'
+  },
+  REDBIRD: {
+    cells: [[1,1],[1,2],[2,2],[2,1],[3,1],[3,2],[3,3]],
+    color: '#CC2936',
+    isSpangram: false,
+    label: 'RED BIRD'
+  },
+  HORSE: {
+    cells: [[2,3],[2,4],[2,5],[3,5],[3,4]],
+    color: '#2E5EAA',
+    isSpangram: false,
+    label: 'HORSE'
+  },
+  SHEEP: {
+    cells: [[4,4],[4,5],[5,5],[5,4],[5,3]],
+    color: '#444444',
+    isSpangram: false,
+    label: 'SHEEP'
+  },
+  FROG: {
+    cells: [[4,1],[4,2],[4,3],[5,2]],
+    color: '#2D8B46',
+    isSpangram: false,
+    label: 'FROG'
+  },
+  DUCK: {
+    cells: [[5,1],[6,1],[6,2],[7,2]],
+    color: '#D4A017',
+    isSpangram: false,
+    label: 'DUCK'
+  },
+  YELLOW: {
+    cells: [[6,3],[6,4],[6,5],[7,5],[7,4],[7,3]],
+    color: '#C5A000',
+    isSpangram: false,
+    label: 'YELLOW'
+  },
+};
+
+// Game state
+let selectedCells = [];
+let foundWordKeys = new Set();
+let hintMeter = 0;  // 0..3
+let hintCount = 0;
+let hintsUsed = new Set();
+let isDragging = false;
+
+// Build cell lookup: "row,col" -> word key
+const cellToWord = {};
+for (const [key, word] of Object.entries(WORDS)) {
+  for (const [r, c] of word.cells) {
+    cellToWord[`${r},${c}`] = key;
+  }
+}
+
+// Render grid
+const gridEl = document.getElementById('grid');
+const svgEl = document.getElementById('lineOverlay');
+const cellElements = [];
+
+for (let r = 0; r < GRID_ROWS; r++) {
+  cellElements[r] = [];
+  for (let c = 0; c < GRID_COLS; c++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.textContent = BOARD[r][c];
+    cell.dataset.row = r;
+    cell.dataset.col = c;
+    gridEl.appendChild(cell);
+    cellElements[r][c] = cell;
+  }
+}
+
+// Resize SVG to match grid
+function resizeSvg() {
+  svgEl.setAttribute('width', gridEl.offsetWidth);
+  svgEl.setAttribute('height', gridEl.offsetHeight);
+}
+resizeSvg();
+window.addEventListener('resize', resizeSvg);
+
+function getCellCenter(r, c) {
+  const cell = cellElements[r][c];
+  const gridRect = gridEl.getBoundingClientRect();
+  const cellRect = cell.getBoundingClientRect();
+  return {
+    x: cellRect.left - gridRect.left + cellRect.width / 2,
+    y: cellRect.top - gridRect.top + cellRect.height / 2
+  };
+}
+
+function drawLines() {
+  svgEl.innerHTML = '';
+  for (let i = 1; i < selectedCells.length; i++) {
+    const [r1, c1] = selectedCells[i - 1];
+    const [r2, c2] = selectedCells[i];
+    const p1 = getCellCenter(r1, c1);
+    const p2 = getCellCenter(r2, c2);
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', p1.x);
+    line.setAttribute('y1', p1.y);
+    line.setAttribute('x2', p2.x);
+    line.setAttribute('y2', p2.y);
+    svgEl.appendChild(line);
+  }
+}
+
+function isAdjacent(r1, c1, r2, c2) {
+  return Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1 && !(r1 === r2 && c1 === c2);
+}
+
+function isSelected(r, c) {
+  return selectedCells.some(([sr, sc]) => sr === r && sc === c);
+}
+
+function isCellFound(r, c) {
+  return cellElements[r][c].classList.contains('found');
+}
+
+function selectCell(r, c) {
+  if (isCellFound(r, c)) return;
+
+  // If already selected, check if it's the previous cell (allow undo)
+  if (selectedCells.length >= 2) {
+    const [pr, pc] = selectedCells[selectedCells.length - 2];
+    if (pr === r && pc === c) {
+      // Undo last selection
+      const [lr, lc] = selectedCells.pop();
+      cellElements[lr][lc].classList.remove('selected');
+      drawLines();
+      return;
+    }
+  }
+
+  if (isSelected(r, c)) return;
+
+  if (selectedCells.length > 0) {
+    const [lr, lc] = selectedCells[selectedCells.length - 1];
+    if (!isAdjacent(lr, lc, r, c)) return;
+  }
+
+  selectedCells.push([r, c]);
+  cellElements[r][c].classList.add('selected');
+  drawLines();
+}
+
+function clearSelection() {
+  for (const [r, c] of selectedCells) {
+    if (!isCellFound(r, c)) {
+      cellElements[r][c].classList.remove('selected');
+    }
+  }
+  selectedCells = [];
+  svgEl.innerHTML = '';
+}
+
+function getSelectedWord() {
+  return selectedCells.map(([r, c]) => BOARD[r][c]).join('');
+}
+
+function showStatus(msg, duration = 2000) {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.style.opacity = 1;
+  if (duration > 0) {
+    setTimeout(() => { el.style.opacity = 0; }, duration);
+  }
+}
+
+function revealWord(key, usedHint = false) {
+  const word = WORDS[key];
+  foundWordKeys.add(key);
+  if (usedHint) hintsUsed.add(key);
+
+  word.cells.forEach(([r, c], i) => {
+    setTimeout(() => {
+      const cell = cellElements[r][c];
+      cell.classList.add('found', 'revealing');
+      cell.style.background = word.color;
+      cell.style.color = 'white';
+      setTimeout(() => cell.classList.remove('revealing'), 300);
+    }, i * 60);
+  });
+
+  // Add to found words display
+  const badge = document.createElement('span');
+  badge.className = 'found-word';
+  badge.style.background = word.color;
+  badge.textContent = word.label;
+  if (word.isSpangram) {
+    badge.style.border = '2px solid #FFD700';
+    badge.style.boxShadow = '0 0 8px rgba(255,215,0,0.4)';
+  }
+  document.getElementById('foundWords').appendChild(badge);
+
+  // Check win
+  if (foundWordKeys.size === Object.keys(WORDS).length) {
+    setTimeout(showWinModal, 800);
+  }
+}
+
+function submitSelection() {
+  const word = getSelectedWord();
+  const cells = [...selectedCells];
+
+  // Check against all words
+  let matchedKey = null;
+  for (const [key, wordData] of Object.entries(WORDS)) {
+    if (foundWordKeys.has(key)) continue;
+    const wordStr = wordData.cells.map(([r, c]) => BOARD[r][c]).join('');
+    if (word === wordStr && cells.length === wordData.cells.length) {
+      // Verify exact cell match
+      let match = true;
+      for (let i = 0; i < cells.length; i++) {
+        if (cells[i][0] !== wordData.cells[i][0] || cells[i][1] !== wordData.cells[i][1]) {
+          match = false;
+          break;
+        }
+      }
+      if (match) { matchedKey = key; break; }
+    }
+    // Also check reverse
+    const revStr = [...wordData.cells].reverse().map(([r, c]) => BOARD[r][c]).join('');
+    if (word === revStr && cells.length === wordData.cells.length) {
+      let match = true;
+      const revCells = [...wordData.cells].reverse();
+      for (let i = 0; i < cells.length; i++) {
+        if (cells[i][0] !== revCells[i][0] || cells[i][1] !== revCells[i][1]) {
+          match = false;
+          break;
+        }
+      }
+      if (match) { matchedKey = key; break; }
+    }
+  }
+
+  clearSelection();
+
+  if (matchedKey) {
+    const w = WORDS[matchedKey];
+    if (w.isSpangram) {
+      showStatus('Spangram found!', 2500);
+    } else {
+      showStatus(`${w.label} found!`, 2000);
+    }
+    revealWord(matchedKey);
+  } else if (word.length >= 4) {
+    // Valid length but not a theme word - fills hint meter
+    hintMeter++;
+    if (hintMeter >= 3) {
+      hintMeter = 0;
+      hintCount++;
+      updateHintUI();
+      showStatus('Hint earned!', 2000);
+    } else {
+      updateHintUI();
+      showStatus(`Not a theme word (+${hintMeter}/3 hint)`, 2000);
+    }
+    // Flash cells briefly
+    for (const [r, c] of cells) {
+      const cell = cellElements[r][c];
+      cell.style.background = '#DEB887';
+      setTimeout(() => {
+        if (!cell.classList.contains('found')) {
+          cell.style.background = '';
+        }
+      }, 400);
+    }
+  } else if (word.length > 0) {
+    showStatus('Words must be at least 4 letters', 2000);
+    for (const [r, c] of cells) {
+      cellElements[r][c].classList.add('invalid-flash');
+      setTimeout(() => cellElements[r][c].classList.remove('invalid-flash'), 400);
+    }
+  }
+}
+
+function updateHintUI() {
+  const fill = document.getElementById('hintFill');
+  fill.style.width = `${(hintMeter / 3) * 100}%`;
+
+  const btn = document.getElementById('hintBtn');
+  btn.disabled = hintCount === 0;
+
+  const countEl = document.getElementById('hintCount');
+  countEl.textContent = `${hintCount} hint${hintCount !== 1 ? 's' : ''}`;
+}
+
+// Hint: reveal the cells of a random unfound word
+document.getElementById('hintBtn').addEventListener('click', () => {
+  if (hintCount <= 0) return;
+  const unfound = Object.keys(WORDS).filter(k => !foundWordKeys.has(k) && !WORDS[k].isSpangram);
+  if (unfound.length === 0) {
+    // Only spangram left
+    const spanKey = Object.keys(WORDS).find(k => WORDS[k].isSpangram && !foundWordKeys.has(k));
+    if (spanKey) {
+      hintCount--;
+      updateHintUI();
+      revealWord(spanKey, true);
+      showStatus('Hint used: Spangram revealed!', 2500);
+    }
+    return;
+  }
+
+  const key = unfound[Math.floor(Math.random() * unfound.length)];
+  hintCount--;
+  updateHintUI();
+
+  // Flash the cells of the word as a hint (highlight them briefly)
+  const word = WORDS[key];
+  word.cells.forEach(([r, c], i) => {
+    setTimeout(() => {
+      const cell = cellElements[r][c];
+      cell.style.background = word.color;
+      cell.style.color = 'white';
+      setTimeout(() => {
+        if (!cell.classList.contains('found')) {
+          cell.style.background = '';
+          cell.style.color = '';
+        }
+      }, 1500);
+    }, i * 80);
+  });
+  hintsUsed.add(key);
+  showStatus(`Hint: look for ${word.label}`, 2500);
+});
+
+function showWinModal() {
+  const totalWords = Object.keys(WORDS).length;
+  let emojis = '';
+  for (const key of Object.keys(WORDS)) {
+    if (WORDS[key].isSpangram) {
+      emojis += hintsUsed.has(key) ? '💡' : '🟡';
+    } else {
+      emojis += hintsUsed.has(key) ? '💡' : '🔵';
+    }
+  }
+  document.getElementById('emojiSummary').textContent = emojis;
+  document.getElementById('modalTitle').textContent = 'Brown Bear, Brown Bear!';
+  document.getElementById('modalText').textContent = `You found all ${totalWords} words!`;
+  document.getElementById('modal').classList.add('active');
+}
+
+// Input handling - mouse
+gridEl.addEventListener('mousedown', (e) => {
+  const cell = e.target.closest('.cell');
+  if (!cell) return;
+  isDragging = true;
+  clearSelection();
+  selectCell(+cell.dataset.row, +cell.dataset.col);
+});
+
+gridEl.addEventListener('mouseover', (e) => {
+  if (!isDragging) return;
+  const cell = e.target.closest('.cell');
+  if (!cell) return;
+  selectCell(+cell.dataset.row, +cell.dataset.col);
+});
+
+document.addEventListener('mouseup', () => {
+  if (isDragging) {
+    isDragging = false;
+    if (selectedCells.length > 0) submitSelection();
+  }
+});
+
+// Input handling - touch
+gridEl.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const cell = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.cell');
+  if (!cell) return;
+  isDragging = true;
+  clearSelection();
+  selectCell(+cell.dataset.row, +cell.dataset.col);
+}, { passive: false });
+
+gridEl.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  if (!isDragging) return;
+  const touch = e.touches[0];
+  const cell = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.cell');
+  if (!cell) return;
+  selectCell(+cell.dataset.row, +cell.dataset.col);
+}, { passive: false });
+
+document.addEventListener('touchend', () => {
+  if (isDragging) {
+    isDragging = false;
+    if (selectedCells.length > 0) submitSelection();
+  }
+});
+
+updateHintUI();
+</script>
+</body>
+</html>
