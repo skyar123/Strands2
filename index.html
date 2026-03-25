@@ -9,28 +9,38 @@
 
   :root{
     --bg: #FDF6E3;
-    --ink: #5D3A1A;
-    --muted: #8B6914;
+    --ink: #3E2723;
+    --muted: #6D4C41;
     --card: #F5E6C8;
-    --clue-bg: #5D3A1A;
+    --clue-bg: #6B3A1A;
     --clue-ink: #FDF6E3;
-    --shadow: rgba(93,58,26,0.2);
+    --shadow: rgba(62,39,35,0.2);
     --accent: #DAA520;
     --accent-2: #CD853F;
-    --overlay: rgba(93,58,26,0.5);
+    --overlay: rgba(62,39,35,0.55);
+    /* Brown Bear rainbow palette */
+    --bb-brown: #6B3A1A;
+    --bb-red: #CC2936;
+    --bb-yellow: #D4A017;
+    --bb-blue: #2E5EAA;
+    --bb-green: #2D8B46;
+    --bb-purple: #7B3F9E;
+    --bb-orange: #E8960C;
+    --bb-black: #3D3D3D;
+    --rainbow: linear-gradient(90deg, var(--bb-red), var(--bb-orange), var(--bb-yellow), var(--bb-green), var(--bb-blue), var(--bb-purple));
   }
 
   body.dark{
-    --bg: #0F1210;
+    --bg: #1A120B;
     --ink: #F2E9D8;
     --muted: #CDBA8A;
-    --card: #1B201C;
-    --clue-bg: #223126;
+    --card: #2C1E14;
+    --clue-bg: #3E2723;
     --clue-ink: #F2E9D8;
     --shadow: rgba(0,0,0,0.45);
     --accent: #DAA520;
     --accent-2: #8A6A2F;
-    --overlay: rgba(0,0,0,0.6);
+    --overlay: rgba(0,0,0,0.65);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -46,18 +56,23 @@
     user-select: none;
     -webkit-user-select: none;
     background-image:
-      radial-gradient(ellipse at 20% 50%, rgba(139,69,19,0.04) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 20%, rgba(218,165,32,0.04) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 80%, rgba(34,139,34,0.04) 0%, transparent 50%);
+      radial-gradient(ellipse at 15% 20%, rgba(204,41,54,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 15%, rgba(46,94,170,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(212,160,23,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 20% 80%, rgba(45,139,70,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 75%, rgba(123,63,158,0.04) 0%, transparent 50%);
   }
 
   h1 {
     font-family: 'Fredoka One', cursive, sans-serif;
-    color: var(--ink);
     font-size: 1.8rem;
     text-align: center;
     margin-bottom: 4px;
-    text-shadow: 1px 1px 0 rgba(218,165,32,0.3);
+    background: var(--rainbow);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(1px 1px 0 rgba(107,58,26,0.15));
   }
 
   .subtitle {
@@ -78,6 +93,10 @@
     text-align: center;
     font-family: 'Patrick Hand', cursive;
     box-shadow: 0 2px 8px var(--shadow);
+    border-bottom: 3px solid;
+    border-image: var(--rainbow) 1;
+    border-image-slice: 1;
+    border-top: none; border-left: none; border-right: none;
   }
 
   .toolbar{
@@ -177,6 +196,10 @@
   .grid-container {
     position: relative;
     margin-bottom: 12px;
+    padding-bottom: 4px;
+    border-bottom: 4px solid transparent;
+    border-image: var(--rainbow) 1;
+    border-radius: 0 0 4px 4px;
   }
 
   .grid-container.page-flip{
@@ -222,10 +245,10 @@
   }
 
   .cell.selected {
-    background: var(--accent-2);
+    background: var(--bb-brown);
     color: white;
     transform: scale(1.08);
-    box-shadow: 0 3px 10px rgba(139,69,19,0.35);
+    box-shadow: 0 3px 10px rgba(107,58,26,0.4);
   }
 
   .cell.found {
@@ -251,9 +274,9 @@
   }
 
   .cell.highlight {
-    outline: 3px solid rgba(255,215,0,0.9);
+    outline: 3px solid var(--bb-yellow);
     outline-offset: 2px;
-    box-shadow: 0 0 0 6px rgba(255,215,0,0.10);
+    box-shadow: 0 0 8px rgba(212,160,23,0.3);
   }
 
   .cell .order-badge{
@@ -307,7 +330,7 @@
   }
 
   svg.line-overlay line {
-    stroke: rgba(139, 69, 19, 0.4);
+    stroke: rgba(107, 58, 26, 0.45);
     stroke-width: 3;
     stroke-linecap: round;
   }
@@ -330,13 +353,13 @@
 
   .hint-meter-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--accent), #FFD700);
+    background: var(--rainbow);
     transition: width 0.4s ease;
     border-radius: 5px;
   }
 
   .hint-btn {
-    background: var(--accent);
+    background: var(--bb-brown);
     color: white;
     border: none;
     padding: 6px 16px;
@@ -348,7 +371,7 @@
   }
 
   .hint-btn:hover:not(:disabled) {
-    background: #B8860B;
+    background: #8B4513;
     transform: scale(1.05);
   }
 
@@ -391,8 +414,11 @@
     padding: 32px;
     max-width: 340px;
     text-align: center;
-    box-shadow: 0 8px 32px rgba(93,58,26,0.3);
+    box-shadow: 0 8px 32px rgba(62,39,35,0.3);
     animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-top: 4px solid transparent;
+    border-image: var(--rainbow) 1;
+    border-left: none; border-right: none; border-bottom: none;
   }
 
   .modal h2 {
@@ -416,7 +442,7 @@
   }
 
   .modal button {
-    background: var(--clue-bg);
+    background: var(--bb-brown);
     color: var(--clue-ink);
     border: none;
     padding: 10px 28px;
@@ -424,10 +450,10 @@
     font-family: 'Fredoka One', cursive;
     font-size: 1rem;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.1s;
   }
 
-  .modal button:hover { background: #8B4513; }
+  .modal button:hover { background: #8B4513; transform: scale(1.03); }
 
   .instructions {
     max-width: 380px;
@@ -464,6 +490,130 @@
     pointer-events: none;
     z-index: 200;
   }
+
+  /* ═══════ Animal Image Reveal ═══════ */
+  .animal-reveal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 150;
+    pointer-events: none;
+    opacity: 0;
+    animation: animalRevealIn 1.8s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  }
+  .animal-reveal-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .animal-reveal img {
+    width: clamp(120px, 40vw, 200px);
+    height: auto;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.35));
+    animation: animalBounce 0.6s 0.2s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  .animal-reveal .animal-name {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    color: white;
+    text-shadow: 2px 3px 6px rgba(0,0,0,0.5);
+    opacity: 0;
+    animation: fadeUp 0.5s 0.5s ease-out forwards;
+  }
+  @keyframes animalRevealIn {
+    0%   { opacity: 0; }
+    15%  { opacity: 1; }
+    75%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  @keyframes animalBounce {
+    0%   { transform: scale(0) rotate(-10deg); }
+    60%  { transform: scale(1.15) rotate(3deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  @keyframes fadeUp {
+    0%   { opacity: 0; transform: translateY(12px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ═══════ Found animal carousel (below grid) ═══════ */
+  .animal-carousel {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 10px 0 4px;
+    min-height: 48px;
+    max-width: 400px;
+    padding: 8px 12px;
+    border-radius: 28px;
+    background: rgba(107,58,26,0.04);
+    border: 2px dashed rgba(107,58,26,0.12);
+  }
+  .animal-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--card);
+    box-shadow: 0 2px 8px var(--shadow);
+    opacity: 0.25;
+    transform: scale(0.7);
+    transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    background: var(--card);
+    filter: grayscale(1);
+  }
+  .animal-thumb.revealed {
+    opacity: 1;
+    transform: scale(1);
+    filter: grayscale(0);
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+  .animal-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  /* ═══════ Spangram glow on found ═══════ */
+  .cell.found.spangram-cell {
+    box-shadow: 0 0 12px rgba(255,215,0,0.5), 0 2px 6px rgba(0,0,0,0.15);
+  }
+
+  /* ═══════ Win screen animal spread ═══════ */
+  .win-animals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin: 12px 0;
+  }
+  .win-animal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    opacity: 0;
+    animation: winAnimalIn 0.5s ease-out forwards;
+  }
+  .win-animal img {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,0.2));
+  }
+  .win-animal span {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+  @keyframes winAnimalIn {
+    0%   { opacity: 0; transform: scale(0.5) translateY(10px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
 </style>
 </head>
 <body>
@@ -494,24 +644,7 @@
   <svg class="line-overlay" id="lineOverlay"></svg>
 </div>
 
-<div class="hint-bar" style="margin-top: 2px;">
-  <label for="difficulty" style="color:#8B6914; font-size:0.95rem;">Difficulty</label>
-  <select id="difficulty" style="
-    font-family: 'Fredoka One', cursive;
-    border: 1px solid #CD853F;
-    border-radius: 14px;
-    padding: 6px 10px;
-    background: #FDF6E3;
-    color: #5D3A1A;
-    font-size: 0.85rem;
-    outline: none;
-  ">
-    <option value="easy">Easy</option>
-    <option value="normal" selected>Normal</option>
-    <option value="hard">Hard</option>
-    <option value="expert">Expert</option>
-  </select>
-</div>
+<div class="animal-carousel" id="animalCarousel"></div>
 
 <div class="hint-bar">
   <div class="hint-meter"><div class="hint-meter-fill" id="hintFill" style="width:0%"></div></div>
@@ -603,106 +736,83 @@
 let GRID_COLS = 6;
 let GRID_ROWS = 8;
 
-const DIFFICULTY_PRESETS = {
-  easy: {
-    id: "easy",
-    minHintWordLen: 4,
-    hintThreshold: 2,
-    hideFoundWordBadges: false,
-    allowUndo: true,
-    randomizeBoard: false,
-  },
-  normal: {
-    id: "normal",
-    minHintWordLen: 4,
-    hintThreshold: 3,
-    hideFoundWordBadges: false,
-    allowUndo: true,
-    randomizeBoard: true,
-  },
-  hard: {
-    id: "hard",
-    minHintWordLen: 5,
-    hintThreshold: 4,
-    hideFoundWordBadges: true,
-    allowUndo: true,
-    randomizeBoard: true,
-  },
-  expert: {
-    id: "expert",
-    minHintWordLen: 6,
-    hintThreshold: 5,
-    hideFoundWordBadges: true,
-    allowUndo: false,
-    randomizeBoard: true,
-  },
+// Expert difficulty — hardest mode, no chooser
+const DIFFICULTY = {
+  id: "expert",
+  minHintWordLen: 6,
+  hintThreshold: 5,
+  hideFoundWordBadges: true,
+  allowUndo: false,
+  randomizeBoard: true,
 };
 
-function getDifficulty() {
-  const el = document.getElementById("difficulty");
-  const key = (el?.value || "normal").toLowerCase();
-  return DIFFICULTY_PRESETS[key] ?? DIFFICULTY_PRESETS.normal;
-}
-
 const BASE_BOARD = [
-  ['B','G','O','L','D','F'],
-  ['R','R','E','H','S','I'],
-  ['O','B','D','H','O','R'],
-  ['W','I','R','D','E','S'],
-  ['N','F','R','O','S','H'],
-  ['B','D','G','P','E','E'],
-  ['E','U','C','Y','E','L'],
-  ['A','R','K','W','O','L'],
+  ['B','H','S','E','O','R'],
+  ['S','R','I','F','S','H'],
+  ['O','H','L','D','D','E'],
+  ['E','W','O','I','B','R'],
+  ['N','E','P','G','R','D'],
+  ['F','B','U','C','Y','E'],
+  ['E','R','D','G','K','L'],
+  ['R','A','O','W','O','L'],
 ];
 
 const BASE_WORDS = {
   BROWNBEAR: {
-    cells: [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[7,1]],
-    color: '#8B4513',
+    cells: [[0,0],[1,1],[2,0],[3,1],[4,0],[5,1],[6,0],[7,1],[7,0]],
+    color: '#6B3A1A',
     isSpangram: true,
-    label: 'BROWN BEAR'
-  },
-  GOLDFISH: {
-    cells: [[0,1],[0,2],[0,3],[0,4],[0,5],[1,5],[1,4],[1,3]],
-    color: '#E8960C',
-    isSpangram: false,
-    label: 'GOLDFISH'
+    label: 'BROWN BEAR',
+    img: 'assets/brown-bear-front.png'
   },
   REDBIRD: {
-    cells: [[1,1],[1,2],[2,2],[2,1],[3,1],[3,2],[3,3]],
+    cells: [[3,5],[2,5],[2,4],[3,4],[3,3],[4,4],[4,5]],
     color: '#CC2936',
     isSpangram: false,
-    label: 'RED BIRD'
+    label: 'RED BIRD',
+    img: 'assets/red-bird.png'
   },
   HORSE: {
-    cells: [[2,3],[2,4],[2,5],[3,5],[3,4]],
+    cells: [[1,5],[0,4],[0,5],[1,4],[0,3]],
     color: '#2E5EAA',
     isSpangram: false,
-    label: 'HORSE'
+    label: 'HORSE',
+    img: 'assets/blue-horse.png'
+  },
+  GOLDFISH: {
+    cells: [[4,3],[3,2],[2,2],[2,3],[1,3],[1,2],[0,2],[0,1]],
+    color: '#E8960C',
+    isSpangram: false,
+    label: 'GOLDFISH',
+    img: 'assets/goldfish.png'
   },
   SHEEP: {
-    cells: [[4,4],[4,5],[5,5],[5,4],[5,3]],
-    color: '#444444',
+    cells: [[1,0],[2,1],[3,0],[4,1],[4,2]],
+    color: '#3D3D3D',
     isSpangram: false,
-    label: 'SHEEP'
+    label: 'SHEEP',
+    img: 'assets/black-sheep.png'
   },
   FROG: {
-    cells: [[4,1],[4,2],[4,3],[5,2]],
+    cells: [[5,0],[6,1],[7,2],[6,3]],
     color: '#2D8B46',
     isSpangram: false,
-    label: 'FROG'
+    label: 'FROG',
+    img: 'assets/green-frog.png'
   },
   DUCK: {
-    cells: [[5,1],[6,1],[6,2],[7,2]],
+    cells: [[6,2],[5,2],[5,3],[6,4]],
     color: '#D4A017',
     isSpangram: false,
-    label: 'DUCK'
+    label: 'DUCK',
+    img: 'assets/yellow-duck.png'
   },
   YELLOW: {
-    cells: [[6,3],[6,4],[6,5],[7,5],[7,4],[7,3]],
+    cells: [[5,4],[5,5],[6,5],[7,5],[7,4],[7,3]],
     color: '#C5A000',
     isSpangram: false,
-    label: 'YELLOW'
+    label: 'YELLOW',
+    img: 'assets/yellow-duck.png'
   },
 };
 
@@ -776,12 +886,7 @@ function pickTransform() {
   return transforms[Math.floor(Math.random() * transforms.length)];
 }
 
-// Restore difficulty selection (persists across reloads)
-const difficultyEl = document.getElementById("difficulty");
-const savedDifficulty = localStorage.getItem("strands:difficulty");
-if (difficultyEl && savedDifficulty && DIFFICULTY_PRESETS[savedDifficulty]) {
-  difficultyEl.value = savedDifficulty;
-}
+// Expert difficulty is always active (no chooser)
 
 const DEFAULT_SETTINGS = {
   darkMode: false,
@@ -816,7 +921,7 @@ function applySettings() {
   if (badgeToggle) badgeToggle.checked = !!SETTINGS.showBadges;
 }
 
-const PROGRESS_KEY = "strands:progress:1";
+const PROGRESS_KEY = "strands:progress:2";
 
 function loadProgress() {
   try {
@@ -832,7 +937,6 @@ function saveProgress(state) {
   localStorage.setItem(PROGRESS_KEY, JSON.stringify(state));
 }
 
-const DIFFICULTY = getDifficulty();
 const savedProgress = loadProgress();
 let TRANSFORM = DIFFICULTY.randomizeBoard ? pickTransform() : "identity";
 if (
@@ -852,7 +956,7 @@ const { board: BOARD, words: WORDS } = transformBoardAndWords(
 GRID_ROWS = BOARD.length;
 GRID_COLS = BOARD[0].length;
 
-const PUZZLE_NUMBER = 1;
+const PUZZLE_NUMBER = 2;
 const THEME_TOTAL = Object.keys(WORDS).length;
 
 // Game state
@@ -978,6 +1082,7 @@ if (foundWordKeys.size > 0) {
   for (const k of foundWordKeys) applyFoundWordVisual(k);
   rebuildFoundBadges();
 }
+buildAnimalCarousel();
 updateHintUI();
 updateProgressText();
 applySettings();
@@ -1099,10 +1204,56 @@ function narrativeLineFor(key) {
   return lines[key] || "I see something in the grid…";
 }
 
+// ═══════ Animal image reveal overlay ═══════
+function showAnimalReveal(key) {
+  const word = WORDS[key];
+  if (!word || !word.img) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'animal-reveal';
+  overlay.innerHTML = `
+    <div class="animal-reveal-inner">
+      <img src="${word.img}" alt="${word.label}">
+      <div class="animal-name">${word.label}</div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  setTimeout(() => overlay.remove(), 2000);
+}
+
+// ═══════ Animal carousel ═══════
+function buildAnimalCarousel() {
+  const carousel = document.getElementById('animalCarousel');
+  if (!carousel) return;
+  carousel.innerHTML = '';
+  for (const key of Object.keys(WORDS)) {
+    const word = WORDS[key];
+    const thumb = document.createElement('div');
+    thumb.className = 'animal-thumb';
+    thumb.id = 'thumb-' + key;
+    if (word.img) {
+      thumb.innerHTML = `<img src="${word.img}" alt="${word.label}">`;
+    }
+    thumb.style.borderColor = word.color;
+    if (foundWordKeys.has(key)) {
+      thumb.classList.add('revealed');
+    }
+    carousel.appendChild(thumb);
+  }
+}
+
+function revealCarouselThumb(key) {
+  const thumb = document.getElementById('thumb-' + key);
+  if (thumb) thumb.classList.add('revealed');
+}
+
 function revealWord(key, usedHint = false) {
   const word = WORDS[key];
   foundWordKeys.add(key);
   if (usedHint) hintsUsed.add(key);
+
+  // Show the animal image reveal
+  showAnimalReveal(key);
+  revealCarouselThumb(key);
 
   const gridContainer = document.querySelector(".grid-container");
   if (gridContainer) {
@@ -1117,6 +1268,7 @@ function revealWord(key, usedHint = false) {
     setTimeout(() => {
       const cell = cellElements[r][c];
       cell.classList.add('found', 'revealing');
+      if (word.isSpangram) cell.classList.add('spangram-cell');
       cell.style.background = word.color;
       cell.style.color = 'white';
       setTimeout(() => cell.classList.remove('revealing'), 300);
@@ -1326,8 +1478,21 @@ function showWinModal() {
     }
   }
   document.getElementById('emojiSummary').textContent = emojis;
+
+  // Build the animal completion spread
+  let animalSpreadHTML = '<div class="win-animals">';
+  Object.entries(WORDS).forEach(([key, w], i) => {
+    if (w.img) {
+      animalSpreadHTML += `<div class="win-animal" style="animation-delay:${i * 0.15}s">
+        <img src="${w.img}" alt="${w.label}">
+        <span>${w.label}</span>
+      </div>`;
+    }
+  });
+  animalSpreadHTML += '</div>';
+
   document.getElementById('modalTitle').textContent = 'Brown Bear, Brown Bear!';
-  document.getElementById('modalText').textContent = `You found all ${totalWords} words!`;
+  document.getElementById('modalText').innerHTML = `You found all ${totalWords} words!` + animalSpreadHTML;
   document.getElementById('modal').classList.add('active');
 
   // Update stats
@@ -1382,7 +1547,7 @@ function startConfetti() {
   const ctx = canvas.getContext("2d");
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  const colors = ["#DAA520", "#CC2936", "#2E5EAA", "#2D8B46", "#F5E6C8"];
+  const colors = ["#CC2936", "#E8960C", "#D4A017", "#2D8B46", "#2E5EAA", "#7B3F9E", "#6B3A1A", "#FFD700"];
   const parts = Array.from({ length: 140 }, () => ({
     x: canvas.width / 2,
     y: canvas.height / 3,
@@ -1492,13 +1657,6 @@ document.addEventListener('touchend', () => {
 });
 
 updateHintUI();
-
-// Changing difficulty reloads the page (simple for a single-file app)
-document.getElementById("difficulty").addEventListener("change", () => {
-  const v = document.getElementById("difficulty").value;
-  localStorage.setItem("strands:difficulty", v);
-  location.reload();
-});
 
 // Initial UI
 document.getElementById("puzzleNum").textContent = `Strands #${PUZZLE_NUMBER}`;
